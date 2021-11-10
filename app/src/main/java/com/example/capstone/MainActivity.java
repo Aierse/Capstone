@@ -17,68 +17,57 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    private static PieChart pieChart;
+    float maximamRadiation = 100;
+    int[] colorArray = new int[] {Color.RED, Color.LTGRAY};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        // 탭 호스트 불러오기
         TabHost tabHost = findViewById(R.id.tabhost);
         tabHost.setup();
-
+        // 1번 탭 연결
         TabHost.TabSpec tabRadiation = tabHost.newTabSpec("RADIATION").setIndicator("방사능 측정");
         tabRadiation.setContent(R.id.radiation);
         tabHost.addTab(tabRadiation);
-
+        // 2번탭 연결
         TabHost.TabSpec tabFindLocation = tabHost.newTabSpec("LOCATION").setIndicator("위치 찾기");
         tabFindLocation.setContent(R.id.findLocation);
         tabHost.addTab(tabFindLocation);
-
+        // 1번탭 선택
         tabHost.setCurrentTab(0);
 
         pieChart();
     }
-
+    //디버깅 용 코드
     private void pieChart()
     {
-        pieChart = (PieChart)findViewById(R.id.piechart);
+        int radiation = 40;
+        ArrayList<PieEntry> data = new ArrayList<PieEntry>();
+        data.add(new PieEntry(radiation));
+        data.add(new PieEntry(maximamRadiation - radiation));
 
-        pieChart.setUsePercentValues(true);
-        pieChart.getDescription().setEnabled(false);
-        pieChart.setExtraOffsets(5,10,5,5);
+        pieChart(data, radiation);
+    }
 
-        pieChart.setDragDecelerationFrictionCoef(0.95f);
+    private void pieChart(ArrayList<PieEntry> data, float radiation)
+    {
+        PieChart pieChart = findViewById(R.id.piechart);
 
-        pieChart.setDrawHoleEnabled(false);
-        pieChart.setHoleColor(Color.WHITE);
-        pieChart.setTransparentCircleRadius(61f);
+        PieDataSet pieDataSet = new PieDataSet(data, "방사능 수치");
+        pieDataSet.setColors(colorArray);
 
-        ArrayList<PieEntry> yValues = new ArrayList<PieEntry>();
+        PieData pieData = new PieData(pieDataSet);
 
-        yValues.add(new PieEntry(34f,"Japen"));
-        yValues.add(new PieEntry(23f,"USA"));
-        yValues.add(new PieEntry(14f,"UK"));
-        yValues.add(new PieEntry(35f,"India"));
-        yValues.add(new PieEntry(20f,"Russia"));
-        yValues.add(new PieEntry(40f,"Korea"));
+        pieData.setValueTextSize(0);
 
-        Description description = new Description();
-        description.setText("세계 국가"); //라벨
-        description.setTextSize(15);
-        pieChart.setDescription(description);
+        pieChart.setHoleRadius(60);
+        pieChart.setCenterText(radiation + "/" + maximamRadiation);
+        pieChart.setCenterTextSize(25);
 
-        pieChart.animateY(1000, Easing.EaseInOutCubic); //애니메이션
 
-        PieDataSet dataSet = new PieDataSet(yValues,"Countries");
-        dataSet.setSliceSpace(3f);
-        dataSet.setSelectionShift(5f);
-        dataSet.setColors(ColorTemplate.JOYFUL_COLORS);
 
-        PieData data = new PieData((dataSet));
-        data.setValueTextSize(10f);
-        data.setValueTextColor(Color.YELLOW);
-
-        pieChart.setData(data);
+        pieChart.setData(pieData);
     }
 }
