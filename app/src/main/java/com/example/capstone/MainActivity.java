@@ -23,13 +23,13 @@ public class MainActivity extends AppCompatActivity {
         TabHost tabHost = findViewById(R.id.tabhost);
         tabHost.setup();
 
-        TabHost.TabSpec tabSpecColor = tabHost.newTabSpec("COLOR").setIndicator("색상");
-        tabSpecColor.setContent(R.id.colorLayout);
-        tabHost.addTab(tabSpecColor);
+        TabHost.TabSpec tabRadiation = tabHost.newTabSpec("RADIATION").setIndicator("방사능 측정");
+        tabRadiation.setContent(R.id.radiation);
+        tabHost.addTab(tabRadiation);
 
-        TabHost.TabSpec tabSpecRota = tabHost.newTabSpec("ROTATION").setIndicator("회전");
-        tabSpecRota.setContent(R.id.rotationLayout);
-        tabHost.addTab(tabSpecRota);
+        TabHost.TabSpec tabFindLocation = tabHost.newTabSpec("LOCATION").setIndicator("위치 찾기");
+        tabFindLocation.setContent(R.id.findLocation);
+        tabHost.addTab(tabFindLocation);
 
         tabHost.setCurrentTab(0);
     }

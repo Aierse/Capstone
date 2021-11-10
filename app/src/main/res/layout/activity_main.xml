@@ -11,42 +11,43 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
         <TabWidget
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@android:id/tabs"/>
+
         <FrameLayout
             android:id="@android:id/tabcontent"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:id="@+id/colorLayout"
-                android:background="#00FF00">
+                android:id="@+id/radiation">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="60dp"
-                    android:text="색상 탭의 내용"/>
+                    android:layout_gravity="center"
+                    android:textSize="15dp"
+                    android:text="테스트"/>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:id="@+id/rotationLayout"
-                android:background="#888888">
+                android:id="@+id/findLocation">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:textColor="#00FF00"
-                    android:textSize="60dp"
-                    android:text="회전 탭의 내용"
+                    android:textSize="15dp"
+                    android:text="테스트2"
                     android:id="@+id/rotView"/>
                 </LinearLayout>
         </FrameLayout>
