@@ -1,6 +1,15 @@
 package com.example.capstone;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.FragmentManager;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -11,11 +20,15 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 
+
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
     float maximamRadiation = 100;
     int[] colorArray = new int[] {Color.RED, Color.LTGRAY};
+
+    private FragmentManager fragmentManager;
+    private MapFragment mapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +49,11 @@ public class MainActivity extends AppCompatActivity {
         tabHost.setCurrentTab(0);
 
         pieChart();
+
+        fragmentManager = getFragmentManager();
+        mapFragment = (MapFragment)fragmentManager.findFragmentById(R.id.googleMap);
+        mapFragment.getMapAsync(this);
+
     }
     //디버깅 용 코드
     private void pieChart()
@@ -66,5 +84,19 @@ public class MainActivity extends AppCompatActivity {
 
 
         pieChart.setData(pieData);
+    }
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        double latitude = 35.10637187150911;        //위도
+        double longitude = 126.89515121598296;       //경도
+
+        LatLng location = new LatLng(latitude, longitude);
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.title("가방 위치");
+        markerOptions.snippet("위도 : " + latitude + "     경도 : " +  longitude) ;
+        markerOptions.position(location);
+        googleMap.addMarker(markerOptions);
+
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location,15));
     }
 }

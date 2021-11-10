@@ -40,13 +40,12 @@
                 android:orientation="vertical"
                 android:id="@+id/findLocation">
 
-                <TextView
+                <fragment
+                    android:id="@+id/googleMap"
+                    class="com.google.android.gms.maps.MapFragment"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:textSize="15sp"
-                    android:text="테스트2"
-                    android:id="@+id/rotView"/>
+                    android:layout_height="544dp"
+                    android:layout_gravity="bottom" />
             </LinearLayout>
         </FrameLayout>
     </LinearLayout>
