@@ -29,11 +29,10 @@
                 android:id="@+id/radiation">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:textSize="15sp"
-                    android:text="테스트"/>
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="테스트"
+                    android:textSize="15sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -43,13 +42,13 @@
                 android:id="@+id/findLocation">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:textSize="15sp"
                     android:text="테스트2"
                     android:id="@+id/rotView"/>
-                </LinearLayout>
+            </LinearLayout>
         </FrameLayout>
     </LinearLayout>
 </TabHost>
