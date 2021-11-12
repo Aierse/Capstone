@@ -5,7 +5,8 @@
     tools:context=".MainActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/tabhost">
+    android:id="@+id/tabhost"
+    >
 
     <LinearLayout
         android:layout_width="match_parent"

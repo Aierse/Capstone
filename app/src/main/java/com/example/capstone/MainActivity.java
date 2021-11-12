@@ -47,9 +47,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         tabHost.addTab(tabFindLocation);
         // 1번탭 선택
         tabHost.setCurrentTab(0);
-
+        //차트
         pieChart();
-
+        //구글 맵
         fragmentManager = getFragmentManager();
         mapFragment = (MapFragment)fragmentManager.findFragmentById(R.id.googleMap);
         mapFragment.getMapAsync(this);
@@ -80,8 +80,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         pieChart.setHoleRadius(60);
         pieChart.setCenterText(radiation + "/" + maximamRadiation);
         pieChart.setCenterTextSize(25);
-
-
 
         pieChart.setData(pieData);
     }
