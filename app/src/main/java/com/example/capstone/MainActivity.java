@@ -251,13 +251,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         public ConnectedBluetoothThread(BluetoothSocket socket) {
             mmSocket = socket;
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
 
             try {
-                mmInStream = socket.getInputStream();
-                mmOutStream = socket.getOutputStream();
+                tmpIn = socket.getInputStream();
+                tmpOut = socket.getOutputStream();
             } catch (IOException e) {
                 Toast.makeText(getApplicationContext(), "소켓 연결 중 오류가 발생했습니다.", Toast.LENGTH_LONG).show();
             }
+
+            mmInStream = tmpIn;
+            mmOutStream = tmpOut;
         }
         public void run() {
             byte[] buffer = new byte[1024];
