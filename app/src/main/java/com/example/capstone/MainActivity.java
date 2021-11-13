@@ -105,7 +105,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         pieChart.setHoleRadius(60);
         pieChart.setCenterTextSize(25);
         pieChart.setTouchEnabled(false);
-
+        pieChart.setDescription(null);
+        pieChart.setDrawEntryLabels(false);
         new RadiationSync().start(); //차트 동기화
         //지도 탭
         fragmentManager = getFragmentManager();
@@ -279,8 +280,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     radiation = random.nextFloat() * 100; // 테스트 코드(수정 필요) = > 블루투스로 데이터 수신하는 위치에 작성해야함
 
                     ArrayList<PieEntry> data = new ArrayList<PieEntry>();
-                    data.add(new PieEntry(radiation));
-                    data.add(new PieEntry(maximamRadiation - radiation));
+                    data.add(new PieEntry(radiation, "방사능 수치"));
+                    data.add(new PieEntry(maximamRadiation - radiation, "최대 측정 가능치"));
 
                     pieChart(data, radiation);
 
@@ -295,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void pieChart(ArrayList<PieEntry> data, float radiation)
     {
-        PieDataSet pieDataSet = new PieDataSet(data, "방사능 수치");
+        PieDataSet pieDataSet = new PieDataSet(data, "");
         pieDataSet.setColors(colorArray);
 
         PieData pieData = new PieData(pieDataSet);
