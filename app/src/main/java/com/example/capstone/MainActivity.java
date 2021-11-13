@@ -39,15 +39,16 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+    //방사능 차트 전역변수
     float maximamRadiation = 100;
     float radiation = 40;
     PieChart pieChart;
     int[] colorArray = new int[] {Color.RED, Color.LTGRAY};
-
+    //지도 전역변수
     private FragmentManager fragmentManager;
     private MapFragment mapFragment;
-
+    //블루투스 전역변수
     private static final int REQUEST_ENABLE_BT = 10; // 블루투스 활성화 상태
     private BluetoothAdapter bluetoothAdapter; // 블루투스 어댑터
     private Set<BluetoothDevice> devices; // 블루투스 디바이스 데이터 셋
@@ -128,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
