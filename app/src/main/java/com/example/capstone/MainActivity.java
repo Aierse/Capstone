@@ -35,11 +35,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
     float maximamRadiation = 100;
+    float radiation = 40;
+    PieChart pieChart;
     int[] colorArray = new int[] {Color.RED, Color.LTGRAY};
 
     private FragmentManager fragmentManager;
@@ -95,41 +98,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 startActivityForResult(intent, REQUEST_ENABLE_BT);
             }
         }
+        //차트 탭
+        pieChart = findViewById(R.id.piechart);
 
-        pieChart();
+        pieChart.setHoleRadius(60);
+        pieChart.setCenterTextSize(25);
+        pieChart.setTouchEnabled(false);
 
+        new RadiationSync().start(); //차트 동기화
+        //지도 탭
         fragmentManager = getFragmentManager();
         mapFragment = (MapFragment)fragmentManager.findFragmentById(R.id.googleMap);
         mapFragment.getMapAsync(this);
     }
-    //디버깅 용 코드
-    private void pieChart()
-    {
-        int radiation = 40;
-        ArrayList<PieEntry> data = new ArrayList<PieEntry>();
-        data.add(new PieEntry(radiation));
-        data.add(new PieEntry(maximamRadiation - radiation));
 
-        pieChart(data, radiation);
-    }
-
-    private void pieChart(ArrayList<PieEntry> data, float radiation)
-    {
-        PieChart pieChart = findViewById(R.id.piechart);
-
-        PieDataSet pieDataSet = new PieDataSet(data, "방사능 수치");
-        pieDataSet.setColors(colorArray);
-
-        PieData pieData = new PieData(pieDataSet);
-
-        pieData.setValueTextSize(0);
-
-        pieChart.setHoleRadius(60);
-        pieChart.setCenterText(radiation + "/" + maximamRadiation);
-        pieChart.setCenterTextSize(25);
-
-        pieChart.setData(pieData);
-    }
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         double latitude = 35.10637187150911;        //위도
@@ -285,7 +267,43 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         });
+
         workerThread.start();
     }
 
+    private class RadiationSync extends Thread{
+        public void run() {
+            try {
+                while (true) {
+                    Random random = new Random();
+                    radiation = random.nextFloat() * 100; // 테스트 코드(수정 필요) = > 블루투스로 데이터 수신하는 위치에 작성해야함
+
+                    ArrayList<PieEntry> data = new ArrayList<PieEntry>();
+                    data.add(new PieEntry(radiation));
+                    data.add(new PieEntry(maximamRadiation - radiation));
+
+                    pieChart(data, radiation);
+
+                    Thread.sleep(500);
+                }
+            }
+            catch (Exception e) {
+                finish();
+            }
+        }
+    }
+
+    private void pieChart(ArrayList<PieEntry> data, float radiation)
+    {
+        PieDataSet pieDataSet = new PieDataSet(data, "방사능 수치");
+        pieDataSet.setColors(colorArray);
+
+        PieData pieData = new PieData(pieDataSet);
+
+        pieData.setValueTextSize(0);
+
+        pieChart.setData(pieData);
+        pieChart.setCenterText(radiation + "/" + maximamRadiation);
+        pieChart.invalidate();
+    }
 }
