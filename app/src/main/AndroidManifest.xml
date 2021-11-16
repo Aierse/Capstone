@@ -19,14 +19,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Capstone">
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name=".SplashActivity"
+            android:theme="@style/SplashTheme"
+            android:screenOrientation="portrait"
+            android:exported="true">/* +스플래시 */
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".MainActivity"></activity>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDlcuXY-W12eAWDQ3Kc0U63JIHDXH9r9u0" />
