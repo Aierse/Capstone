@@ -10,10 +10,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TabHost;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,7 +32,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -60,10 +56,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private byte[] readBuffer; // 수신 된 문자열을 저장하기 위한 버퍼
     private int readBufferPosition; // 버퍼 내 문자 저장 위치
 
-    private TextView textViewReceive; // 수신 된 데이터를 표시하기 위한 텍스트 뷰
-    private EditText editTextSend; // 송신 할 데이터를 작성하기 위한 에딧 텍스트
-    private Button buttonSend; // 송신하기 위한 버튼
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +74,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // 1번탭 선택
         tabHost.setCurrentTab(0);
 
+        //차트 탭
+        pieChart = findViewById(R.id.piechart);
+
+        pieChart.setHoleRadius(60);
+        pieChart.setCenterTextSize(25);
+        pieChart.setTouchEnabled(false);
+        pieChart.setDescription(null);
+        pieChart.setDrawEntryLabels(false);
+        //new RadiationSync().start(); //차트 동기화
+        //지도 탭
+        fragmentManager = getFragmentManager();
+        mapFragment = (MapFragment)fragmentManager.findFragmentById(R.id.googleMap);
+        mapFragment.getMapAsync(this);
+
         // 블루투스 활성화하기
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter(); // 블루투스 어댑터를 디폴트 어댑터로 설정
 
@@ -99,19 +105,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 startActivityForResult(intent, REQUEST_ENABLE_BT);
             }
         }
-        //차트 탭
-        pieChart = findViewById(R.id.piechart);
-
-        pieChart.setHoleRadius(60);
-        pieChart.setCenterTextSize(25);
-        pieChart.setTouchEnabled(false);
-        pieChart.setDescription(null);
-        pieChart.setDrawEntryLabels(false);
-        new RadiationSync().start(); //차트 동기화
-        //지도 탭
-        fragmentManager = getFragmentManager();
-        mapFragment = (MapFragment)fragmentManager.findFragmentById(R.id.googleMap);
-        mapFragment.getMapAsync(this);
     }
 
     @Override
@@ -226,45 +219,36 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void run() {
                 while(true) {
                     try {
-                        // 데이터를 수신했는지 확인합니다.
                         int byteAvailable = inputStream.available();
-                        // 데이터가 수신 된 경우
+
                         if(byteAvailable > 0) {
                             // 입력 스트림에서 바이트 단위로 읽어 옵니다.
                             byte[] bytes = new byte[byteAvailable];
                             inputStream.read(bytes);
                             // 입력 스트림 바이트를 한 바이트씩 읽어 옵니다.
                             for(int i = 0; i < byteAvailable; i++) {
-                                byte tempByte = bytes[i];
-                                // 개행문자를 기준으로 받음(한줄)
-                                if(tempByte == '\n') {
-                                    // readBuffer 배열을 encodedBytes로 복사
-                                    byte[] encodedBytes = new byte[readBufferPosition];
-                                    System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                                    // 인코딩 된 바이트 배열을 문자열로 변환
-                                    final String text = new String(encodedBytes, "US-ASCII");
-                                    readBufferPosition = 0;
+                                readBuffer[readBufferPosition++] =  bytes[i];
 
-                                    handler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            // 텍스트 뷰에 출력
-                                            radiation = Float.parseFloat(text);
-                                        }
-                                    });
-                                } // 개행 문자가 아닐 경우
-                                else {
-                                    readBuffer[readBufferPosition++] = tempByte;
-                                }
+                                if( bytes[i] == '\n')
+                                    break;
                             }
+
+                            byte[] encodedBytes = new byte[readBufferPosition];
+                            System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
+
+                            final String text = new String(encodedBytes, "US-ASCII");
+                            readBufferPosition = 0;
+
+                            radiation = Float.parseFloat(text);
+                            ArrayList<PieEntry> data = new ArrayList<PieEntry>();
+                            data.add(new PieEntry(radiation, "방사능 수치"));
+                            data.add(new PieEntry(maximamRadiation - radiation, "최대 측정 가능치"));
+
+                            pieChart(data, radiation);
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        // 1초마다 받아옴
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
+
+                        Thread.sleep(500);
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -272,28 +256,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         workerThread.start();
-    }
-
-    private class RadiationSync extends Thread{
-        public void run() {
-            try {
-                while (true) {
-                    Random random = new Random();
-                    //radiation = random.nextFloat() * 100; // 테스트 코드(수정 필요) = > 블루투스로 데이터 수신하는 위치에 작성해야함
-
-                    ArrayList<PieEntry> data = new ArrayList<PieEntry>();
-                    data.add(new PieEntry(radiation, "방사능 수치"));
-                    data.add(new PieEntry(maximamRadiation - radiation, "최대 측정 가능치"));
-
-                    pieChart(data, radiation);
-
-                    Thread.sleep(500);
-                }
-            }
-            catch (Exception e) {
-                finish();
-            }
-        }
     }
 
     private void pieChart(ArrayList<PieEntry> data, float radiation)
