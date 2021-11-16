@@ -226,10 +226,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             inputStream.read(bytes);
                             // 입력 스트림 바이트를 한 바이트씩 읽어 옵니다.
                             for(int i = 0; i < byteAvailable; i++) {
-                                readBuffer[readBufferPosition++] =  bytes[i];
-
                                 if( bytes[i] == '\n')
                                     break;
+
+                                readBuffer[readBufferPosition++] =  bytes[i];
                             }
 
                             byte[] encodedBytes = new byte[readBufferPosition];
