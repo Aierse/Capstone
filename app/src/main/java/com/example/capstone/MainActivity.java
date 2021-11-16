@@ -41,8 +41,8 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
     //방사능 차트 전역변수
-    float maximamRadiation = 100;
-    float radiation = 40;
+    float maximamRadiation = 3.6f;
+    float radiation = 0;
     PieChart pieChart;
     int[] colorArray = new int[] {Color.RED, Color.LTGRAY};
     //지도 전역변수
@@ -199,6 +199,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         // UUID 생성
         UUID uuid = java.util.UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+
         // Rfcomm 채널을 통해 블루투스 디바이스와 통신하는 소켓 생성
         try {
             bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid);
@@ -223,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         workerThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(Thread.currentThread().isInterrupted()) {
+                while(true) {
                     try {
                         // 데이터를 수신했는지 확인합니다.
                         int byteAvailable = inputStream.available();
@@ -243,11 +244,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     // 인코딩 된 바이트 배열을 문자열로 변환
                                     final String text = new String(encodedBytes, "US-ASCII");
                                     readBufferPosition = 0;
+
                                     handler.post(new Runnable() {
                                         @Override
                                         public void run() {
                                             // 텍스트 뷰에 출력
-                                            textViewReceive.append(text + "\n");
+                                            radiation = Float.parseFloat(text);
                                         }
                                     });
                                 } // 개행 문자가 아닐 경우
@@ -277,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             try {
                 while (true) {
                     Random random = new Random();
-                    radiation = random.nextFloat() * 100; // 테스트 코드(수정 필요) = > 블루투스로 데이터 수신하는 위치에 작성해야함
+                    //radiation = random.nextFloat() * 100; // 테스트 코드(수정 필요) = > 블루투스로 데이터 수신하는 위치에 작성해야함
 
                     ArrayList<PieEntry> data = new ArrayList<PieEntry>();
                     data.add(new PieEntry(radiation, "방사능 수치"));
