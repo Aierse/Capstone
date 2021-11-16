@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     selectBluetoothDevice(); // 블루투스 디바이스 선택 함수 호출
                 }
                 else { // '취소'를 눌렀을 때
-                    finish();
+                    //이곳에 파일에서 좌표를 불러오는 코드가 필요함
                 }
                 break;
         }
@@ -190,7 +190,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
             }
         }
-        // UUID 생성
         UUID uuid = java.util.UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 
         // Rfcomm 채널을 통해 블루투스 디바이스와 통신하는 소켓 생성
@@ -239,12 +238,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             final String text = new String(encodedBytes, "US-ASCII");
                             readBufferPosition = 0;
 
-                            radiation = Float.parseFloat(text);
+                            String[] parsing = text.split(",");
+
+                            radiation = Float.parseFloat(parsing[0]);
                             ArrayList<PieEntry> data = new ArrayList<PieEntry>();
                             data.add(new PieEntry(radiation, "방사능 수치"));
                             data.add(new PieEntry(maximamRadiation - radiation, "최대 측정 가능치"));
 
                             pieChart(data, radiation);
+                            //여기에 지도를 동기화 하세요
                         }
 
                         Thread.sleep(500);
