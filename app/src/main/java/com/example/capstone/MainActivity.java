@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TabHost;
 
 import androidx.annotation.NonNull;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     double latitude = 35.10637187150911;    //위도
     double longitude = 126.89515121598296;  //경도
 
+
     //블루투스 전역변수
     private static final int REQUEST_ENABLE_BT = 10; // 블루투스 활성화 상태
     private BluetoothAdapter bluetoothAdapter; // 블루투스 어댑터
@@ -59,11 +62,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Thread workerThread = null; // 문자열 수신에 사용되는 쓰레드
     private byte[] readBuffer; // 수신 된 문자열을 저장하기 위한 버퍼
     private int readBufferPosition; // 버퍼 내 문자 저장 위치
+    private GoogleMap map;
+    Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        button=(Button) findViewById(R.id.button);
+
         // 탭 호스트 불러오기
         TabHost tabHost = findViewById(R.id.tabhost);
         tabHost.setup();
@@ -96,6 +103,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         fragmentManager = getFragmentManager();
         mapFragment = (MapFragment) fragmentManager.findFragmentById(R.id.googleMap);
         mapFragment.getMapAsync(this);
+
+
+
         // 블루투스 활성화하기
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter(); // 블루투스 어댑터를 디폴트 어댑터로 설정
 
@@ -118,6 +128,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
 
+        setGoogleMap(googleMap,latitude,longitude);
+
+
         LatLng location = new LatLng(latitude, longitude);
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.title("가방 위치");
@@ -126,6 +139,34 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.addMarker(markerOptions);
 
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location,15));
+    }
+    public void setGoogleMap (GoogleMap m, double latitude, double longitude) {
+        int i=0;
+        while (i != 10) {
+            try {
+
+
+                Random ran = new Random();
+
+                latitude = ran.nextDouble()*50;
+                longitude = ran.nextDouble()*100;
+
+                map = m;
+                LatLng location = new LatLng(latitude, longitude);
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.title("가방 위치");
+                markerOptions.snippet("위도 : " + latitude + "     경도 : " + longitude);
+                markerOptions.position(location);
+                map.addMarker(markerOptions);
+
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 10));
+
+                Thread.sleep(1000);
+                i++;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -214,7 +255,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // 데이터를 수신하기 위한 쓰레드 생성
         workerThread = new Thread(new Runnable() {
-            private Object Random;
 
             @Override
             public void run() {
@@ -254,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             latitude = ran.nextDouble();
                             longitude = ran.nextDouble();
 
-
+                            setGoogleMap(map,latitude,longitude);
 
                         }
 
