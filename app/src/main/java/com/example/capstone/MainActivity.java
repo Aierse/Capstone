@@ -40,10 +40,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     float maximamRadiation = 3.6f;
     float radiation = 0;
     PieChart pieChart;
-    int[] colorArray = new int[] {Color.RED, Color.LTGRAY};
+    int[] colorArray = new int[]{Color.RED, Color.LTGRAY};
     //지도 전역변수
     private FragmentManager fragmentManager;
     private MapFragment mapFragment;
+
+
     //블루투스 전역변수
     private static final int REQUEST_ENABLE_BT = 10; // 블루투스 활성화 상태
     private BluetoothAdapter bluetoothAdapter; // 블루투스 어댑터
@@ -82,60 +84,56 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         pieChart.setTouchEnabled(false);
         pieChart.setDescription(null);
         pieChart.setDrawEntryLabels(false);
-        //new RadiationSync().start(); //차트 동기화
+
+        ArrayList<PieEntry> data = new ArrayList<PieEntry>();
+        data.add(new PieEntry(radiation, "방사능 수치"));
+        data.add(new PieEntry(maximamRadiation - radiation, "최대 측정 가능치"));
+
+        pieChart(data, radiation);
         //지도 탭
         fragmentManager = getFragmentManager();
-        mapFragment = (MapFragment)fragmentManager.findFragmentById(R.id.googleMap);
+        mapFragment = (MapFragment) fragmentManager.findFragmentById(R.id.googleMap);
         mapFragment.getMapAsync(this);
-
         // 블루투스 활성화하기
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter(); // 블루투스 어댑터를 디폴트 어댑터로 설정
 
-        if(bluetoothAdapter == null) { // 디바이스가 블루투스를 지원하지 않을 때
-            finish();
+        if (bluetoothAdapter.isEnabled()) { // 블루투스가 활성화 상태 (기기에 블루투스가 켜져있음)
+            selectBluetoothDevice(); // 블루투스 디바이스 선택 함수 호출
         }
-        else { // 디바이스가 블루투스를 지원 할 때
-            if(bluetoothAdapter.isEnabled()) { // 블루투스가 활성화 상태 (기기에 블루투스가 켜져있음)
-                selectBluetoothDevice(); // 블루투스 디바이스 선택 함수 호출
-            }
-            else { // 블루투스가 비 활성화 상태 (기기에 블루투스가 꺼져있음)
-                // 블루투스를 활성화 하기 위한 다이얼로그 출력
-                Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                // 선택한 값이 onActivityResult 함수에서 콜백된다.
-                startActivityForResult(intent, REQUEST_ENABLE_BT);
-            }
+        else { // 블루투스가 비 활성화 상태 (기기에 블루투스가 꺼져있음)
+            // 블루투스를 활성화 하기 위한 다이얼로그 출력
+            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            // 선택한 값이 onActivityResult 함수에서 콜백된다.
+            startActivityForResult(intent, REQUEST_ENABLE_BT);
         }
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        bluetoothAdapter.disable();
     }
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        double latitude = 35.10637187150911;        //위도
-        double longitude = 126.89515121598296;       //경도
+        double latitude = 35.10637187150911;    //위도
+        double longitude = 126.89515121598296;      //경도
 
         LatLng location = new LatLng(latitude, longitude);
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.title("가방 위치");
-        markerOptions.snippet("위도 : " + latitude + "     경도 : " +  longitude) ;
+        markerOptions.snippet("위도 : " + latitude + "     경도 : " + longitude);
         markerOptions.position(location);
         googleMap.addMarker(markerOptions);
 
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location,15));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location,15));
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode) {
-            case REQUEST_ENABLE_BT :
-                if(resultCode == RESULT_OK) { // '사용'을 눌렀을 때
-                    selectBluetoothDevice(); // 블루투스 디바이스 선택 함수 호출
-                }
-                else { // '취소'를 눌렀을 때
-                    //이곳에 파일에서 좌표를 불러오는 코드가 필요함
-                }
-                break;
-        }
+        if (resultCode == RESULT_OK)
+            selectBluetoothDevice();
     }
 
     public void selectBluetoothDevice() {
@@ -145,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         int pariedDeviceCount = devices.size();
         // 페어링 되어있는 장치가 없는 경우
         if(pariedDeviceCount == 0) {
-            // 페어링을 하기위한 함수 호출
+            receiveData();
         }
         // 페어링 되어있는 장치가 있는 경우
         else {
@@ -169,6 +167,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     // 해당 디바이스와 연결하는 함수 호출
+                    if (charSequences[which].toString()=="취소")
+                        return;
                     connectDevice(charSequences[which].toString());
                 }
             });
@@ -246,7 +246,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             data.add(new PieEntry(maximamRadiation - radiation, "최대 측정 가능치"));
 
                             pieChart(data, radiation);
-                            //여기에 지도를 동기화 하세요
                         }
 
                         Thread.sleep(500);
