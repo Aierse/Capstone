@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,7 +45,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     //지도 전역변수
     private FragmentManager fragmentManager;
     private MapFragment mapFragment;
-
+    double latitude = 35.10637187150911;    //위도
+    double longitude = 126.89515121598296;  //경도
 
     //블루투스 전역변수
     private static final int REQUEST_ENABLE_BT = 10; // 블루투스 활성화 상태
@@ -115,8 +117,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        double latitude = 35.10637187150911;    //위도
-        double longitude = 126.89515121598296;      //경도
 
         LatLng location = new LatLng(latitude, longitude);
         MarkerOptions markerOptions = new MarkerOptions();
@@ -214,6 +214,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // 데이터를 수신하기 위한 쓰레드 생성
         workerThread = new Thread(new Runnable() {
+            private Object Random;
+
             @Override
             public void run() {
                 while(true) {
@@ -246,6 +248,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             data.add(new PieEntry(maximamRadiation - radiation, "최대 측정 가능치"));
 
                             pieChart(data, radiation);
+
+                            Random ran = new Random();
+
+                            latitude = ran.nextDouble();
+                            longitude = ran.nextDouble();
+
+
+
                         }
 
                         Thread.sleep(500);
