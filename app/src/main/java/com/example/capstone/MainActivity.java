@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         int pariedDeviceCount = devices.size();
         // 페어링 되어있는 장치가 없는 경우
         if(pariedDeviceCount == 0) {
-            receiveData();
+ 
         }
         // 페어링 되어있는 장치가 있는 경우
         else {
