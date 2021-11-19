@@ -9,13 +9,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TabHost;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -43,9 +41,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener,
-        OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
     //방사능 차트 전역변수
     float maximamRadiation = 3.6f;
     float radiation = 0;
@@ -88,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         // 1번탭 선택
         tabHost.setCurrentTab(0);
 
+        Button btn = findViewById(R.id.findbag);
         //차트 탭
         pieChart = findViewById(R.id.piechart);
 
@@ -100,9 +97,6 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         ArrayList<PieEntry> data = new ArrayList<PieEntry>();
         data.add(new PieEntry(radiation, "방사능 수치"));
         data.add(new PieEntry(maximamRadiation - radiation, "최대 측정 가능치"));
-
-        Button btn = findViewById(R.id.findbag);
-
 
 
         pieChart(data, radiation);
@@ -198,22 +192,6 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location,15));
     }
-
-    @Override
-    public void onMyLocationClick(@NonNull Location location) {
-        Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG)
-                .show();
-    }
-
-    @Override
-    public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT)
-                .show();
-        // Return false so that we don't consume the event and the default behavior still occurs
-        // (the camera animates to the user's current position).
-        return false;
-    }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
