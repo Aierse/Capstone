@@ -31,6 +31,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -166,6 +167,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 iStream.close();
                 fileContents = sBuffer.toString();
             }
+        } catch (FileNotFoundException e) {
+            latitude = 126.734086;
+            longitude = 127.269311;
         } catch (Exception e) {
             e.printStackTrace();
         }
