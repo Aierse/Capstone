@@ -262,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
             }
         }
-        UUID uuid = java.util.UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+        UUID uuid = java.util.UUID.fromString("00001801-0000-1000-8000-00805f9b34fb");
 
         // Rfcomm 채널을 통해 블루투스 디바이스와 통신하는 소켓 생성
         try {
