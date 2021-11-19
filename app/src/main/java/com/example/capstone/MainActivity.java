@@ -5,14 +5,17 @@ import android.app.FragmentManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TabHost;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,16 +32,20 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
+        GoogleMap.OnMyLocationClickListener,
+        OnMapReadyCallback {
     //방사능 차트 전역변수
     float maximamRadiation = 3.6f;
     float radiation = 0;
@@ -47,10 +54,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     //지도 전역변수
     private FragmentManager fragmentManager;
     private MapFragment mapFragment;
-    double latitude = 35.10637187150911;    //위도
-    double longitude = 126.89515121598296;  //경도
+    private GoogleMap map;
 
-
+    double latitude;    //위도
+    double longitude;      //경도
     //블루투스 전역변수
     private static final int REQUEST_ENABLE_BT = 10; // 블루투스 활성화 상태
     private BluetoothAdapter bluetoothAdapter; // 블루투스 어댑터
@@ -62,14 +69,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Thread workerThread = null; // 문자열 수신에 사용되는 쓰레드
     private byte[] readBuffer; // 수신 된 문자열을 저장하기 위한 버퍼
     private int readBufferPosition; // 버퍼 내 문자 저장 위치
-    private GoogleMap map;
-    Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         // 탭 호스트 불러오기
         TabHost tabHost = findViewById(R.id.tabhost);
         tabHost.setup();
@@ -97,38 +101,91 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         data.add(new PieEntry(radiation, "방사능 수치"));
         data.add(new PieEntry(maximamRadiation - radiation, "최대 측정 가능치"));
 
+        Button btn = findViewById(R.id.findbag);
+
+
+
         pieChart(data, radiation);
         //지도 탭
         fragmentManager = getFragmentManager();
         mapFragment = (MapFragment) fragmentManager.findFragmentById(R.id.googleMap);
         mapFragment.getMapAsync(this);
-
-
-
         // 블루투스 활성화하기
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter(); // 블루투스 어댑터를 디폴트 어댑터로 설정
 
         if (bluetoothAdapter.isEnabled()) { // 블루투스가 활성화 상태 (기기에 블루투스가 켜져있음)
             selectBluetoothDevice(); // 블루투스 디바이스 선택 함수 호출
-        }
-        else { // 블루투스가 비 활성화 상태 (기기에 블루투스가 꺼져있음)
+        } else { // 블루투스가 비 활성화 상태 (기기에 블루투스가 꺼져있음)
             // 블루투스를 활성화 하기 위한 다이얼로그 출력
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             // 선택한 값이 onActivityResult 함수에서 콜백된다.
             startActivityForResult(intent, REQUEST_ENABLE_BT);
         }
+
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LatLng l = new LatLng(latitude, longitude);
+
+                map.clear();
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(l, 15));
+
+                MarkerOptions newMarker = new MarkerOptions();
+                newMarker.title("가방 위치");
+                newMarker.snippet("위도 : " + latitude + "     경도 : " + longitude);
+                newMarker.position(l);
+                map.addMarker(newMarker);
+            }
+        });
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         bluetoothAdapter.disable();
+        writeFile("gps.txt", latitude + "," + longitude);
+    }
+
+    private void writeFile(String fileName, String msg) {
+        try {
+            OutputStreamWriter oStreamWriter = new OutputStreamWriter(openFileOutput(fileName,
+                    Context.MODE_PRIVATE));
+            oStreamWriter.write(msg);
+            oStreamWriter.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String readFile(String fileName) {
+        String fileContents = "";
+        try {
+            InputStream iStream = openFileInput(fileName);
+            if(iStream != null) {
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(iStream));
+                String temp = "";
+
+                StringBuffer sBuffer = new StringBuffer();
+                while((temp = bufferedReader.readLine()) != null) {
+                    sBuffer.append(temp);
+                }
+                iStream.close();
+                fileContents = sBuffer.toString();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return fileContents;
     }
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
+        map = googleMap;
 
-        setGoogleMap(googleMap,latitude,longitude);
-
+        String[] matrix = readFile("gps.txt").split(",");
+        latitude = Double.parseDouble(matrix[0]);
+        longitude = Double.parseDouble(matrix[1]);
 
         LatLng location = new LatLng(latitude, longitude);
         MarkerOptions markerOptions = new MarkerOptions();
@@ -137,36 +194,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         markerOptions.position(location);
         googleMap.addMarker(markerOptions);
 
+        googleMap.getUiSettings().setMapToolbarEnabled(false);
+
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location,15));
     }
-    public void setGoogleMap (GoogleMap m, double latitude, double longitude) {
-        int i=0;
-        while (i != 10) {
-            try {
 
-
-                Random ran = new Random();
-
-                latitude = ran.nextDouble()*50;
-                longitude = ran.nextDouble()*100;
-
-                map = m;
-                LatLng location = new LatLng(latitude, longitude);
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.title("가방 위치");
-                markerOptions.snippet("위도 : " + latitude + "     경도 : " + longitude);
-                markerOptions.position(location);
-                map.addMarker(markerOptions);
-
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 10));
-
-                Thread.sleep(1000);
-                i++;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    @Override
+    public void onMyLocationClick(@NonNull Location location) {
+        Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG)
+                .show();
     }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT)
+                .show();
+        // Return false so that we don't consume the event and the default behavior still occurs
+        // (the camera animates to the user's current position).
+        return false;
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -183,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         int pariedDeviceCount = devices.size();
         // 페어링 되어있는 장치가 없는 경우
         if(pariedDeviceCount == 0) {
- 
+
         }
         // 페어링 되어있는 장치가 있는 경우
         else {
@@ -254,7 +301,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // 데이터를 수신하기 위한 쓰레드 생성
         workerThread = new Thread(new Runnable() {
-
             @Override
             public void run() {
                 while(true) {
@@ -288,13 +334,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                             pieChart(data, radiation);
 
-                            Random ran = new Random();
+                            double newlatatude = Double.parseDouble(parsing[1]);
+                            double newlongitude = Double.parseDouble(parsing[2]);
 
-                            latitude = ran.nextDouble();
-                            longitude = ran.nextDouble();
-
-                            setGoogleMap(map,latitude,longitude);
-
+                            if (newlatatude != 0 && newlongitude != 0) {
+                                latitude = newlatatude;
+                                longitude = newlongitude;
+                            }
                         }
 
                         Thread.sleep(500);

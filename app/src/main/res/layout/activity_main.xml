@@ -35,7 +35,7 @@
                     android:id="@+id/piechart"/>
             </LinearLayout>
 
-            <LinearLayout
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
@@ -47,7 +47,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="544dp"
                     android:layout_gravity="bottom" />
-            </LinearLayout>
+
+                <Button
+                    android:id="@+id/findbag"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="right|bottom"
+                    android:layout_marginRight="5dp"
+                    android:text="가방 찾기" />
+            </FrameLayout>
         </FrameLayout>
     </LinearLayout>
 </TabHost>
