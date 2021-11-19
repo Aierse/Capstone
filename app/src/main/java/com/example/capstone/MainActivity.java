@@ -170,6 +170,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } catch (FileNotFoundException e) {
             latitude = 126.734086;
             longitude = 127.269311;
+            writeFile("gps.txt", latitude + "," + longitude);
+
+            return readFile("gps.txt");
         } catch (Exception e) {
             e.printStackTrace();
         }
