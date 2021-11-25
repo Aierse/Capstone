@@ -44,7 +44,7 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
     //방사능 차트 전역변수
-    float maximamRadiation = 3.6f;
+    float maximamRadiation = 10.0f;
     float radiation = 0;
     PieChart pieChart;
     int[] colorArray = new int[]{Color.RED, Color.LTGRAY};
@@ -99,8 +99,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         data.add(new PieEntry(radiation, "방사능 수치"));
         data.add(new PieEntry(maximamRadiation - radiation, "최대 측정 가능치"));
 
-
-        pieChart(data, radiation);
+        pieChart(data, radiation, false);
         //지도 탭
         fragmentManager = getFragmentManager();
         mapFragment = (MapFragment) fragmentManager.findFragmentById(R.id.googleMap);
@@ -313,14 +312,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             String[] parsing = text.split(",");
 
                             radiation = Float.parseFloat(parsing[0]);
+                            double newlatatude = Double.parseDouble(parsing[1]);
+                            double newlongitude = Double.parseDouble(parsing[2]);
+
+                            boolean measurable = true;
+                            if (radiation == -1) {
+                                radiation = 0;
+                                measurable = false;
+                            }
+                            else if (radiation >= 10.0f)
+                                maximamRadiation = radiation;
+                            else
+                                maximamRadiation = 10.0f;
+
                             ArrayList<PieEntry> data = new ArrayList<PieEntry>();
                             data.add(new PieEntry(radiation, "방사능 수치"));
                             data.add(new PieEntry(maximamRadiation - radiation, "최대 측정 가능치"));
 
-                            pieChart(data, radiation);
-
-                            double newlatatude = Double.parseDouble(parsing[1]);
-                            double newlongitude = Double.parseDouble(parsing[2]);
+                            pieChart(data, radiation, measurable);
 
                             if (newlatatude != 0 && newlongitude != 0) {
                                 latitude = newlatatude;
@@ -339,7 +348,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         workerThread.start();
     }
 
-    private void pieChart(ArrayList<PieEntry> data, float radiation)
+    private void pieChart(ArrayList<PieEntry> data, float radiation, boolean measurable)
     {
         PieDataSet pieDataSet = new PieDataSet(data, "");
         pieDataSet.setColors(colorArray);
@@ -349,7 +358,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         pieData.setValueTextSize(0);
 
         pieChart.setData(pieData);
-        pieChart.setCenterText(radiation + "/" + maximamRadiation);
+        if (measurable)
+            pieChart.setCenterText(radiation + " μSv/" + maximamRadiation + " μSv");
+        else
+            pieChart.setCenterText("가이거카운터를 확인해주세요.");
         pieChart.invalidate();
     }
 }
