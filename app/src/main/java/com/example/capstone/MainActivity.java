@@ -332,8 +332,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             pieChart(data, radiation, measurable);
 
                             if (newlatatude != 0 && newlongitude != 0) {
-                                latitude = newlatatude  - 0.04148995;
-                                longitude = newlongitude  - 0.35801279;
+                                latitude = newlatatude + 0.04148995;
+                                longitude = newlongitude + 0.35801279;
                             }
                         }
 
